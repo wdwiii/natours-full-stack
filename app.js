@@ -9,6 +9,7 @@ app.use(express.json());
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours.json`)
 );
+
 app.get('/api/v1/tours', (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -19,8 +20,19 @@ app.get('/api/v1/tours', (req, res) => {
   });
 });
 
+app.get(`/api/v1/tours/:id`, (req, res) => {
+  const { id } = req.params;
+  console.log('id: ', id);
+  //console.log(tours);
+  const tour = tours.filter((tour) => tour.id == id);
+  console.log('tour: ', tour);
+  res.status(200).json({
+    status: 'success',
+  });
+});
+
 app.post(`/api/v1/tours`, (req, res) => {
-  const newId = indexOf(tours[tours.length - 1]) + 1;
+  const newId = tours[tours.length - 1].id + 1;
   const newTour = Object.assign({ id: newId }, req.body);
   tours.push(newTour);
 
