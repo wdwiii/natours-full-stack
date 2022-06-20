@@ -1,3 +1,4 @@
+const { application } = require('express');
 const express = require('express');
 const fs = require('fs');
 const morgan = require('morgan');
@@ -5,13 +6,15 @@ const morgan = require('morgan');
 const app = express();
 const port = 3000;
 
+//=====================
 //MIDDLEWARE
+//=====================
 app.use(express.json());
 
-app.use((req, res, next) => {
-  console.log('Hello from Middleware');
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log('Hello from Middleware');
+//   next();
+// });
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
@@ -25,7 +28,13 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours.json`)
 );
 
+const users = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/users.json`)
+);
+
+//=====================
 //ROUTE HANDLERS
+//=====================
 const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -101,29 +110,117 @@ const deleteTour = (req, res) => {
     status: 'success',
     data: null,
   });
-  console.log({
+};
+
+const getAllUsers = (req, res) => {
+  res.status(200).json({
     status: 'success',
+    results: users.length,
+    data: { users },
+  });
+};
+
+const getUser = (req, res) => {
+  const id = +req.params.id;
+  if (id > users.length) {
+    res.status(404).json({
+      status: 'failed',
+      message: 'User does not exist',
+    });
+  }
+
+  const user = users.find((user) => user.id === id);
+  res.status(200).json({
+    status: 'success',
+    retrievedAt: new Date().toISOString(),
+    data: user,
+  });
+};
+
+const createUser = (req, res) => {
+  const newId = users[users.length] + 1;
+  const newUser = Object.assign({ id: newId }, req.body);
+  users.push(newUser);
+  fs.writeFile(
+    `${__dirname}/dev-data/dev/users.json`,
+    JSON.stringify(users),
+    (err) => {
+      res.status(201).json({
+        message: 'New user created',
+        data: { newUser },
+      });
+    }
+  );
+};
+
+const updateUser = (req, res) => {
+  const id = +req.params.id;
+  if (id > users.length) {
+    res.status(404).json({
+      status: 'Not Found',
+      message: 'You have entered an invalid id',
+    });
+  }
+  const user = users.find((user) => user.id === id);
+  const newUser = Object.assign(
+    { name: 'Willie Whitfield', role: 'Admin' },
+    req.body
+  );
+  res.status(200).json({
+    status: 'success',
+    message: 'User has been updated',
+    updatedAt: new Date().toISOString(),
+    data: { user: newUser },
+  });
+};
+
+const deleteUser = (req, res) => {
+  const id = +req.params.id;
+  if (id > users.length) {
+    res.status(404).json({
+      status: 'Not Found',
+      message: 'You have entered an invalid id',
+    });
+  }
+  const user = users.find((user) => user.id === id);
+  res.status(200).json({
+    message: 'User deleted',
+    name: user.name,
     id: id,
     data: null,
   });
 };
 
+//=====================
 //ROUTES
-// app.get('/api/v1/tours', getAllTours);
-// app.post(`/api/v1/tours`, createTour);
-// app.get(`/api/v1/tours/:id`, getTour);
-// app.patch('/api/v1/tours/:id', updateTour);
-// app.delete('/api/v1/tours/:id', deleteTour);
+//=====================
 
+//** Tours **//
 app.route('/api/v1/tours').get(getAllTours).post(createTour);
 
 app
   .route(`/api/v1/tours/:id`)
   .get(getTour)
-  .patch(createTour)
+  .patch(updateTour)
   .delete(deleteTour);
 
+//** Users **//
+app.route(`/api/v1/users`).get(getAllUsers).post(createUser);
+app
+  .route('/api/v1/users/:id')
+  .get(getUser)
+  .patch(updateUser)
+  .delete(deleteUser);
+
+// app
+//   .route(`/api/v1/users/:id`)
+//   .get(getUser)
+//   .patch(updateUser)
+//   .delete(deleteUser);
+
+//=====================
 //LISTENER
+//=====================
 app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
