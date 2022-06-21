@@ -7,6 +7,15 @@ const users = JSON.parse(
 //=====================
 //ROUTE HANDLERS
 //=====================
+exports.checkID = (req, res, next, val) => {
+  const id = +req.params.id;
+  if (id > users.length) {
+    return res
+      .status(404)
+      .json({ status: 'failed', message: 'The user cannot be found' });
+  }
+  next();
+};
 
 exports.getAllUsers = (req, res) => {
   res.status(200).json({
@@ -17,14 +26,6 @@ exports.getAllUsers = (req, res) => {
 };
 
 exports.getUser = (req, res) => {
-  const id = +req.params.id;
-  if (id > users.length) {
-    res.status(404).json({
-      status: 'failed',
-      message: 'User does not exist',
-    });
-  }
-
   const user = users.find((user) => user.id === id);
   res.status(200).json({
     status: 'success',
@@ -50,13 +51,6 @@ exports.createUser = (req, res) => {
 };
 
 exports.updateUser = (req, res) => {
-  const id = +req.params.id;
-  if (id > users.length) {
-    res.status(404).json({
-      status: 'Not Found',
-      message: 'You have entered an invalid id',
-    });
-  }
   const user = users.find((user) => user.id === id);
   const newUser = Object.assign(
     { name: 'Willie Whitfield', role: 'Admin' },
@@ -71,13 +65,6 @@ exports.updateUser = (req, res) => {
 };
 
 exports.deleteUser = (req, res) => {
-  const id = +req.params.id;
-  if (id > users.length) {
-    res.status(404).json({
-      status: 'Not Found',
-      message: 'You have entered an invalid id',
-    });
-  }
   exports.user = users.find((user) => user.id === id);
   res.status(200).json({
     message: 'User deleted',
