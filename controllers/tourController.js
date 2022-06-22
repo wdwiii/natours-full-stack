@@ -7,12 +7,22 @@ const tours = JSON.parse(
 //=====================
 //ROUTE HANDLERS
 //=====================
-exports.checkID = (req, res, next, val) => {
+exports.checkID = (req, res, next) => {
   const id = +req.params.id;
   if (id > tours.length) {
     return res.status(404).json({
       status: 'failed',
       message: 'The tour you are looking for can not be found',
+    });
+  }
+  next();
+};
+
+exports.checkBody = (req, res, next) => {
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: 'failed',
+      message: 'invalid request',
     });
   }
   next();
