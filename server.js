@@ -18,7 +18,7 @@ mongoose
     useFindAndModify: false,
   })
   .then((con) => {
-    console.log(con.connections);
+    //console.log(con.connections);
   });
 
 const port = process.env.PORT || 3000;
@@ -35,6 +35,18 @@ const toursSchema = new mongoose.Schema({
 
 const Tour = mongoose.model('Tour', toursSchema);
 
+const testTour = new Tour({
+  name: 'Broward',
+  rating: 3.5,
+  price: 399,
+});
+
+testTour
+  .save()
+  .then((doc) => console.log(doc))
+  .catch((err) => console.log(err));
+
+//console.log(testTour);
 //=====================
 //LISTENER
 //=====================
