@@ -10,6 +10,8 @@ const { getAllTours, createTour, getTour, updateTour, deleteTour } =
 //=====================
 //ROUTES
 //=====================
+router.route('/top-5-tours').get(tourController.aliasTopTours, getAllTours);
+
 router.route('/').get(getAllTours).post(createTour);
 
 router.route(`/:id`).get(getTour).patch(updateTour).delete(deleteTour);
